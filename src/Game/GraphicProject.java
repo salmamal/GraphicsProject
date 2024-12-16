@@ -18,7 +18,7 @@ public class GraphicProject extends JFrame {
         glcanvas.addGLEventListener(listener);
         glcanvas.addKeyListener(listener);
         getContentPane().add(glcanvas, BorderLayout.CENTER);
-        Animator animator = new FPSAnimator(glcanvas, 60);
+        Animator animator = new FPSAnimator(glcanvas, 30);
         animator.start();
         configureWindow();
         glcanvas.requestFocus();
