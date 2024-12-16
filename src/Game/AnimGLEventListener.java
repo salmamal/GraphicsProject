@@ -98,6 +98,34 @@ public class AnimGLEventListener extends AnimListener{
         DrawMenu(gl);
 
     }
+// drawscore
+    public void drawscore(GL gl) {
+        gl.glColor3f(0.0f, 0.0f, 0.0f); // Set color to black
+        gl.glRasterPos2f(0.4f, 0.8f); // Set text position (x, y)
+        // Use a library like FreeType for advanced font rendering
+        // For a simple example, you can use the built-in font rendering functions (if available)
+        // but they might be limited.
+       // Font font = new Font("Arial", Font.BOLD, 20); // Assuming you have a Font class
+        String Score = "Score: " + score;
+        for (char c:Score.toCharArray()) {
+            GLUT glut =new GLUT();
+            glut.glutBitmapCharacter(GLUT.BITMAP_HELVETICA_18, c);
+        }
+    }
+    // Timer
+    public void Timer(GL gl) {
+        gl.glColor3f(0.0f, 0.0f, 0.0f); // Set color to black
+        gl.glRasterPos2f(0.4f, 0.7f); // Set text position (x, y)
+        // Use a library like FreeType for advanced font rendering
+        // For a simple example, you can use the built-in font rendering functions (if available)
+        // but they might be limited.
+        // Font font = new Font("Arial", Font.BOLD, 20); // Assuming you have a Font class
+        String Time = "Time: " + time;
+        for (char c:Time.toCharArray()) {
+            GLUT glut =new GLUT();
+            glut.glutBitmapCharacter(GLUT.BITMAP_HELVETICA_18, c);
+        }
+    }
 
 
 
