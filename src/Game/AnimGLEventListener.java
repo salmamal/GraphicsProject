@@ -98,8 +98,10 @@ public class AnimGLEventListener extends AnimListener implements MouseListener ,
         GL gl = gld.getGL();
         gl.glClear(GL.GL_COLOR_BUFFER_BIT);
         gl.glLoadIdentity();
-
-
+        if (GameOver ){
+            DrawPlayerOne(gl, dinoIndex1);
+            return;
+        }
         // Animation logic
         frameCounter++;
         if (frameCounter >= frameDelay) {
@@ -297,6 +299,18 @@ public class AnimGLEventListener extends AnimListener implements MouseListener ,
 
     }
     public void DrawPlayerOne(GL gl, int index){
+
+        if (GameOver) {
+
+            DrawSprite(gl, 45, 25, currentFrame, 0.7f, 0.5f); // Bottom area
+            DrawBackground(gl);  // Draw background to keep it visible
+            DrawSprite(gl, 45, 68, currentFrame, 0.7f, 0.4f); // Top area
+            DrawSprite(gl, x, y, dinoIndex1, 0.2f, 0.2f); // Show dinosaur
+            DrawSprite(gl, x1, 55, treeIndex, 0.09f, 0.09f); // Show tree
+
+            return; // Don't update positions or move elements
+
+        }
         gl.glEnable(GL.GL_BLEND);
         gl.glBindTexture(GL.GL_TEXTURE_2D, textures[index]);
 
@@ -386,13 +400,11 @@ public class AnimGLEventListener extends AnimListener implements MouseListener ,
     }
     private boolean checkCollision(double x1, double y1, double x2, double y2) {
 
-        double dinoWidth = 10;
-        double dinoHeight = 12;
-
+        double dinoWidth = 8;
+        double dinoHeight = 40;
 
         double obstacleWidth = 8;
-        double obstacleHeight = 10;
-
+        double obstacleHeight = 40;
 
         boolean collisionX = x1 < x2 + obstacleWidth && x1 + dinoWidth > x2;
         boolean collisionY = y1 < y2 + obstacleHeight && y1 + dinoHeight > y2;
