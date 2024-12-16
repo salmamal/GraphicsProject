@@ -2,7 +2,6 @@ package Game;
 
 import Texture.TextureReader;
 import Texture.AnimListener;
-import com.sun.opengl.util.GLUT;
 
 import java.awt.*;
 import java.awt.event.*;
@@ -28,9 +27,12 @@ public class AnimGLEventListener extends AnimListener{
     int jumpy1 =6;
     boolean isJump2 = false;
     int jumpy2 =6;
-//    boolean isDown1=false;
-//    boolean isDown2=false;
+
     boolean GameOver = false;
+    boolean isPlayer1Active = false; // اللاعب الأول
+    boolean isPlayer2Active = false; // اللاعب الثاني
+
+
     int treeSpeed = 3;
     int x =20, y = 60;
     int x2=27,y2=13; // player2
@@ -49,10 +51,6 @@ public class AnimGLEventListener extends AnimListener{
     int dinoRate2=0;
     int dinoMaxRate2=6;
     boolean isGameStarted2=false;
-    private GLUT glut;
-
-    int score = 0; // نقاط اللاعب
-    int scoreIncrement = 1;
 
 
     public AnimGLEventListener() {
@@ -99,16 +97,17 @@ public class AnimGLEventListener extends AnimListener{
 
     @Override
     public void display(GLAutoDrawable gld) {
+
         GL gl = gld.getGL();
         gl.glClear(GL.GL_COLOR_BUFFER_BIT);
         gl.glLoadIdentity();
 
-        gl.glColor3f(1.0f, 1.0f, 1.0f);
-//
-        // تمكين المزج للتعامل مع الشفافية
-        gl.glEnable(GL.GL_BLEND);
-        gl.glBlendFunc(GL.GL_SRC_ALPHA, GL.GL_ONE_MINUS_SRC_ALPHA);
-//
+        if (GameOver) {
+            // Display the game over screen with the dinosaur and tree
+            DrawPlayerOne(gl, dinoIndex1); // Show dinosaur and tree only
+            return;
+        }
+
         // Animation logic
         frameCounter++;
         if (frameCounter >= frameDelay) {
@@ -130,9 +129,6 @@ public class AnimGLEventListener extends AnimListener{
 
         // Calculate bounce offset for the overlay
         float bounceOffset = (float) Math.sin(bounceTime) * bounceAmplitude;
-
-
-
 
         if (isGameStarted1){
             DrawPlayerOne(gl,dinoIndex1);
@@ -162,34 +158,11 @@ public class AnimGLEventListener extends AnimListener{
         dinoRate2++;
         if(dinoRate2>=dinoMaxRate2) {
             dinoRate2=0;
-//            if(!isDown2)
                 dinoIndex2 = (dinoIndex2 == 68) ? 69 : 68;// Toggle between bird1 (4) and bird2 (5)
 
-//            else if(isDown2){
-//                dinoIndex2 = (dinoIndex2 == 68) ? 69 : 68;
-//            }
 
         }
-        score += scoreIncrement;
-        DrawScore(gl,score);
 
-//        if(selectedOption==0){
-//            DrawPlayerOne(gl, dinoIndex);
-//        }
-//        dinoIndex++;
-    }
-
-    private void DrawScore(GL gl, int score) {
-        String scoreText = "Score: " + score;
-
-        // إعداد النص للرسم
-        gl.glColor3f(0.0f, 0.0f, 0.0f); // لون النص (أسود)
-        gl.glRasterPos2f(-0.95f, 0.85f); // موقع النص في الشاشة
-
-        for (char c : scoreText.toCharArray()) {
-            GLUT glut=new GLUT();
-            glut.glutBitmapCharacter(GLUT.BITMAP_HELVETICA_18, c); // طباعة كل حرف
-        }
     }
 
 
@@ -215,13 +188,6 @@ public class AnimGLEventListener extends AnimListener{
         int key = e.getKeyCode();
         keyBits.set(key);
 
-
-//        if(key == KeyEvent.VK_SPACE){
-//            if (!isJump) {
-//                isJump = true;
-//            }
-//            dinoIndex=3;
-//        }
 
         // Up arrow key moves the selection up
         if (key == KeyEvent.VK_UP) {
@@ -252,33 +218,15 @@ public class AnimGLEventListener extends AnimListener{
             }
             dinoIndex1=64;
         }
+
         if (key==KeyEvent.VK_W) {
             if (!isJump2) {
                 isJump2 = true;
             }
             dinoIndex2=70;
         }
-//         if (key == KeyEvent.VK_SPACE) {
-//            if (!isJump) {
-//                isJump = true;
-//            }
-//            dinoIndex=64;
-//        }
-//         if(key == KeyEvent.VK_S){
-//            if(!isDown){
-//                isDown=true;
-//            }
-////            index 9 & 10 => dino-duck
-//            dinoIndex = (dinoIndex == 68) ? 69 : 68;
-//        }
-//        else {
-//            if (isDown){
-//                isDown=false;
-//            }
-////            index 1&2 =>dino-run
-//            dinoIndex=(dinoIndex == 62)?63:62;
-//        }
-        }
+
+    }
 
 
     @Override
@@ -338,6 +286,18 @@ public class AnimGLEventListener extends AnimListener{
 
     }
     public void DrawPlayerOne(GL gl, int index){
+
+        if (GameOver) {
+
+            DrawSprite(gl, 45, 25, currentFrame, 0.7f, 0.5f); // Bottom area
+            DrawBackground(gl);  // Draw background to keep it visible
+            DrawSprite(gl, 45, 68, currentFrame, 0.7f, 0.4f); // Top area
+            DrawSprite(gl, x, y, dinoIndex1, 0.2f, 0.2f); // Show dinosaur
+            DrawSprite(gl, x1, 55, treeIndex, 0.09f, 0.09f); // Show tree
+
+            return; // Don't update positions or move elements
+
+        }
         gl.glEnable(GL.GL_BLEND);
         gl.glBindTexture(GL.GL_TEXTURE_2D, textures[index]);
 
@@ -346,9 +306,10 @@ public class AnimGLEventListener extends AnimListener{
             DrawSprite(gl, x1, 55, treeIndex, 0.09f, 0.09f);
         }
 
-        //collosion
-        if (checkCollision(x, y, x1, y1)) {
-            GameOver = true;
+//        collosion
+
+        if (checkCollision1(x, y, x1, y1)) {
+            GameOver= true;
             System.out.println("Collision detected! Game Over.");
             return;
         }
@@ -373,6 +334,7 @@ public class AnimGLEventListener extends AnimListener{
         }
 
     }
+
     public void DrawPlayerTwo(GL gl, int index){
         gl.glEnable(GL.GL_BLEND);
         gl.glBindTexture(GL.GL_TEXTURE_2D, textures[index]);
@@ -387,13 +349,6 @@ public class AnimGLEventListener extends AnimListener{
         }
         if(x1>20 && x1<67){
             DrawSprite(gl, x1, 8, treeIndex, 0.09f, 0.09f);
-        }
-
-        //collosion
-        if (checkCollision(x, y, x1, y1)) {
-            GameOver = true;
-            System.out.println("Collision detected! Game Over.");
-            return;
         }
 
         //tree
@@ -425,21 +380,30 @@ public class AnimGLEventListener extends AnimListener{
         }
 
     }
-    private boolean checkCollision(double x1, double y1, double x2, double y2) {
-
-        double dinoWidth = 10;
-        double dinoHeight = 12;
 
 
-        double obstacleWidth = 8;
-        double obstacleHeight = 10;
+    private boolean checkCollision1(double dinoX, double dinoY, double treeX, double treeY) {
+        double dinoWidth = 8;
+        double dinoHeight = 40;
+
+        double treeWidth = 8;
+        double treeHeight = 40;
 
 
-        boolean collisionX = x1 < x2 + obstacleWidth && x1 + dinoWidth > x2;
-        boolean collisionY = y1 < y2 + obstacleHeight && y1 + dinoHeight > y2;
+        boolean collisionX = dinoX < treeX + treeWidth && dinoX + dinoWidth > treeX;
+        boolean collisionY = dinoY < treeY + treeHeight && dinoY + dinoHeight > treeY;
+
+
+        if (collisionX && collisionY) {
+            System.out.println("Collision Detected!");
+            System.out.printf("Dino: (x: %.1f, y: %.1f), Tree: (x: %.1f, y: %.1f)%n", dinoX, dinoY, treeX, treeY);
+        } else {
+            System.out.println("No Collision Detected.");
+        }
 
         return collisionX && collisionY;
     }
+
 
     public void DrawMenu(GL gl) {
         // Draw "Start Game"
